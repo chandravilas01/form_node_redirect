@@ -1,0 +1,4 @@
+services:
+  from_node_redirect.from_redirect_services:
+    class: Drupal\from_node_redirect\FormRedirectServices
+    arguments: ['@config.factory', '@path.validator']

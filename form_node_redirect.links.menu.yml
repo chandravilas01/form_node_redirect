@@ -1,0 +1,6 @@
+form_node_redirect.admin_settings_form:  
+  title: 'Form Node Redirect'  
+  route_name: form_node_redirect.admin_settings_form  
+  description: 'Form Content Redirect provides configuration to redirect content forms to a custom path on submit'  
+  parent: system.admin_config_system  
+  weight: 99 

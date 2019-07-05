@@ -1,0 +1,13 @@
+name: Form Node Redirect
+description: Node or Content Redirect from on submit, redirects to custom inner route.
+
+type: module
+# core: 8.x
+
+configure: form_node_redirect.admin_settings_form
+
+# Information added by Drupal.org packaging script on 2018-03-26
+version: '8.x'
+core: '8.x'
+project: 'form_node_redirect'
+datestamp: 1522079301

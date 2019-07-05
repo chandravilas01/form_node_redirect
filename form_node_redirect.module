@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * form_node_redirect.module.
+ *
+ *
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Cache\Cache;
+
+/**
+ * Implements hook_help().
+ */
+function form_node_redirect_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help.
+    case 'help.page.form_node_redirect':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The  module form_node_redirect provide settings to redirect to custom path on form submit. On a browser that respects this setting') . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Configuring the module') . '</dt>';
+      $output .= '<dd>' . t("To configure the module visit the <a href=':config-page'>Form Redirect</a> page, <em>check</em> which feature you'd like to enable and save the configuration. For this you need the <em>Administer Form Redirect</em> permission.", [':config-page' => Url::fromRoute('form_node_redirect.admin_settings_form')->toString()]) . '</dd>';
+      $output .= '</dl>';
+
+      return $output;
+  }
+}
+
+function form_node_redirect_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  
+  foreach (array_keys($form['actions']) as $action) {
+    
+    if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+      $form['actions'][$action]['#submit'][] = 'form_node_redirect_form_submit';
+    }
+  }
+}
+
+
+function form_node_redirect_form_submit($form, FormStateInterface $form_state) {
+
+  $node = $form_state->getFormObject()->getEntity();
+  $config = \Drupal::config('from_node_redirect.adminsettings');
+  $url_object = \Drupal::service('path.validator')->getUrlIfValid($config->get($node->getType()));
+  
+  if ($config->get($node->getType()) && ($url_object != FALSE ) ) {
+      $url = url::fromUserInput($config->get($node->getType()));
+      $form_state->setRedirectUrl($url);
+  }  
+}
