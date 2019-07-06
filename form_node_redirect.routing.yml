@@ -4,6 +4,4 @@ form_node_redirect.admin_settings_form:
     _form: '\Drupal\form_node_redirect\Form\NodeRedirectConfigForm'  
     _title: 'Redirect Node Form'  
   requirements:  
-    _permission: 'access administration pages'  
-  options:  
-    _admin_route: TRUE  
+    _permission: 'administer form_node_redirect'  

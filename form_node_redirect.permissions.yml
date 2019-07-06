@@ -1,0 +1,3 @@
+administer form_node_redirect:
+  title: 'Administer Form Node Redirect'
+  description: 'Allow access to configure the module settings.'

@@ -1,5 +1,5 @@
 name: Form Node Redirect
-description: Node or Content Redirect from on submit, redirects to custom inner route.
+description: Node or Content Redirect form on submit, redirects to custom inner route.
 
 type: module
 # core: 8.x

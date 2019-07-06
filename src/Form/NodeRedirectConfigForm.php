@@ -5,11 +5,14 @@
  */  
 namespace Drupal\form_node_redirect\Form; 
 
-
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface; 
 use Drupal\Core\Form\ConfigFormBase;  
-use Drupal\Core\Form\FormStateInterface;  
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\form_node_redirect\FormNodeRedirectServices;  
+use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Path\PathValidatorInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
 
 /**
  * config form for content redirect to custom internal path.
@@ -18,12 +21,60 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class NodeRedirectConfigForm extends ConfigFormBase {  
   
+  /**
+   * The config .
+   *
+   * @var \Drupal\Core\Config\ConfigFactory
+   */
+  protected $configFactory;
+
+  /**
+   * The path validator.
+   *
+   * @var \Drupal\Core\Path\PathValidatorInterface
+   */
+  protected $pathValidator;
+
+  /**
+   * The bundle info.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfo
+   */
+  protected $entityBundleInfo;
+
+  /**
+   * Constructs a new ContactFormEditForm.
+   *
+   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   *   The email validator.
+   * @param \Drupal\Core\Path\PathValidatorInterface $path_validator
+   *   The path validator service.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfo $entity_bundle_info
+   *   The entity type bundle info service
+   */
+  public function __construct(ConfigFactory $config_factory, PathValidatorInterface $path_validator, EntityTypeBundleInfo $entity_bundle_info) {
+    $this->configFactory = $config_factory;
+    $this->pathValidator = $path_validator;
+    $this->entityBundleInfo = $entity_bundle_info;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('path.validator'),
+      $container->get('entity_type.bundle.info')
+    );
+  }
+
   /**  
    * {@inheritdoc}  
    */  
   protected function getEditableConfigNames() {  
     return [  
-      'from_node_redirect.adminsettings',  
+      'form_node_redirect.adminsettings',  
     ];  
   }  
 
@@ -39,8 +90,8 @@ class NodeRedirectConfigForm extends ConfigFormBase {
    */  
   public function buildForm(array $form, FormStateInterface $form_state) {  
     
-    $config = $this->config('from_node_redirect.adminsettings');  
-    $node_types = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
+    $config = $this->config('form_node_redirect.adminsettings');  
+    $node_types = $this->entityBundleInfo->getBundleInfo('node');
 
     $form['label']  = array(
       '#type' => 'label',
@@ -77,7 +128,7 @@ class NodeRedirectConfigForm extends ConfigFormBase {
       if ($key == 'submit') {
         break;
       }
-      \Drupal::service('config.factory')->getEditable('from_node_redirect.adminsettings')->set($key , $value)->save();
+      $this->configFactory->getEditable('form_node_redirect.adminsettings')->set($key , $value)->save();
     }
   }
 
@@ -90,15 +141,18 @@ class NodeRedirectConfigForm extends ConfigFormBase {
 
     foreach ($form_values as $key => $value) {
       # code...
-      $url_object = \Drupal::service('path.validator')->getUrlIfValid($value);
+      $url_object = $this->pathValidator->getUrlIfValid($value);
       if ($key == 'submit') {
         break;
       }
-      if (mb_substr($value, 0, 1) !== '/') {
-        $form_state->setErrorByName($value , t(' The path should start with /.'));
-      }
-      if ($url_object == FALSE) {
-        $form_state->setErrorByName($value , t(' The path ' . $value . ' is not a valid internal path.'));  
+
+      if (!empty($value)) {
+        if (mb_substr($value, 0, 1) !== '/') {
+          $form_state->setErrorByName($value , t(' The path should start with /.'));
+        }
+        if ($url_object == FALSE) {
+          $form_state->setErrorByName($value , t(' The path ' . $value . ' is not a valid internal path.'));  
+        }
       }
     }
   }  

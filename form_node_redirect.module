@@ -4,7 +4,6 @@
  * @file
  * form_node_redirect.module.
  *
- *
  */
 
 use Drupal\Core\Form\FormStateInterface;
@@ -32,6 +31,11 @@ function form_node_redirect_help($route_name, RouteMatchInterface $route_match) 
   }
 }
 
+/**
+ * Implements hook_form_node_form_alter().
+ *
+ * Redirect content form to a configured path.
+ */
 function form_node_redirect_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   
   foreach (array_keys($form['actions']) as $action) {
@@ -42,11 +46,15 @@ function form_node_redirect_form_node_form_alter(&$form, FormStateInterface $for
   }
 }
 
-
+/**
+ * Implements hook_form_form_submit().
+ *
+ * Redirect content form to a configured path.
+ */
 function form_node_redirect_form_submit($form, FormStateInterface $form_state) {
 
   $node = $form_state->getFormObject()->getEntity();
-  $config = \Drupal::config('from_node_redirect.adminsettings');
+  $config = \Drupal::config('form_node_redirect.adminsettings');
   $url_object = \Drupal::service('path.validator')->getUrlIfValid($config->get($node->getType()));
   
   if ($config->get($node->getType()) && ($url_object != FALSE ) ) {
